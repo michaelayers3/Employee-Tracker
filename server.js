@@ -1,10 +1,11 @@
 const express = require('express');
+const { default: inquirer } = require('inquirer');
 const mysql = require('mysql2');
 
 const PORT = process.env.PORT || 3001;
 const app = express();
 
-app.use(express.urlendcoded({ extended: false }));
+app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 const db = mysql.createConnection(
@@ -18,11 +19,203 @@ const db = mysql.createConnection(
     console.log('Connected to the employee database.')
 );
 
+//     console.log(`
+// ======================================================
+//  _______             _                       
+// (_______)           | |                                           
+//  _____   ____  ____ | | ___  _   _  ____ ____    
+// |  ___) |    \|  _ \| |/ _ \| | | |/ _  ) _  )  
+// | |_____| | | | | | | | |_| | |_| ( (/ ( (/ /       
+// |_______)_|_|_| ||_/|_|\___/ \__  |\____)____)    
+//               |_|           (____/                                                  
+//  ______                 
+// |  ___ \      
+// | | _ | | ____ ____   ____  ____  ____  ____      
+// | || || |/ _  |  _ \  / _  |/ _  |/ _  )/ ___) 
+// | || || ( ( | | | | ( ( | ( ( | ( (/ /| |     
+// |_||_||_|\_||_|_| |_|\_||_|\_|| |\____)_|   
+//                           (_____|
+// ======================================================
+//    `);
+inquirer
+.prompt([
+    {
+        type: 'list',
+        name: 'choice',
+        message: 'What would you like to do?',
+        choices: [
+            'View All Departments',
+            'View All Roles',
+            'View All Employees',
+            'Add a Department',
+            'Add a Role',
+            'Add an Employee',
+            'Update an Employee Role',
+            // 'Update an Employee Manager',
+            // 'View Employees by Manager',
+            // 'View Employees by Department',
+            // 'Delete a Department',
+            // 'Delete a Role',
+            // 'Delete an Employee',
+            // 'View the Total Utilized Budget of a Department',
+            'Exit'
+        ]
+    }
+])
+.then((answers) => {
+    if (answers.choice === 'View All Departments') {
+        db.query('SELECT * FROM department', function (err, results) {
+            console.table(results);
+        }
+        )}
+    else if (answers.choice === 'View All Roles') {
+        db.query('SELECT * FROM role', function (err, results) {
+            console.table(results);
+        }
+        )}
+    else if (answers.choice === 'View All Employees') {
+        db.query('SELECT * FROM employee', function (err, results) {
+            console.table(results);
+        }
+        )}
+    else if (answers.choice === 'Add a Department') {
+        inquirer
+        .prompt([
+            {
+                type: 'input',
+                name: 'department',
+                message: 'What is the name of the department you would like to add?'
+            }
+        ])
+        .then((response) => {
+            let newDepartment = response.department;
+        db.query('INSERT INTO department SET ?', newDepartment , function (err, results) {
+            console.table(results);
+        }
+        )})}
+    else if (answers.choice === 'Add a Role') {
+        inquirer
+        .prompt([
+            {
+                type: 'input',
+                name: 'title',
+                message: 'What is the title of the role you would like to add?'
+            },
+            {
+                type: 'choice',
+                name: 'department_id',
+                message: 'What is the department id of the role you would like to add?',
+                choices: [
+                    '1',
+                    '2',
+                    '3',
+                    '4',
+                    '5',
+                ]
+            },
+            {
+                type: 'input',
+                name: 'salary',
+                message: 'What is the salary of the role you would like to add?'
+            },
+           
+        ])
+        .then((response) => {
+            let newRole = (response.title, response.department_id, response.salary);
+        db.query('INSERT INTO role SET ?', newRole , function (err, results) {
+            console.table(results);
+        }
+        )})}
+    else if (answers.choice === 'Add an Employee') {
+        inquirer
+        .prompt([
+            {
+                type: 'input',
+                name: 'first_name',
+                message: 'What is the first name of the employee you would like to add?'
+            },
+            {
+                type: 'input',
+                name: 'last_name',
+                message: 'What is the last name of the employee you would like to add?'
+            },
+            {
+                type: 'choice',
+                name: 'role_id',
+                message: 'What is the role id of the employee you would like to add?',
+                choices: [
+                    '1',
+                    '2',
+                    '3',
+                    '4',
+                    '5',
+                ]
+            },
+            {
+                type: 'choice',
+                name: 'manager_id',
+                message: 'What is the manager id of the employee you would like to add? (Select NULL if none)',
+                choices: [
+                    '1',
+                    '2',
+                    '3',
+                    '4',
+                    '5',
+                    'NULL'
+                ]
+            },
+        ])
+        .then((response) => {
+            let newEmployee = (response.first_name, response.last_name, response.role_id, response.manager_id);
+        db.query('INSERT INTO employee SET ?', newEmployee , function (err, results) {
+            console.table(results);
+        }
+        )})}
+    else if (answers.choice === 'Update an Employee Role') {
+        inquirer
+        .prompt([
+            {
+                type: 'choice',
+                name: 'employee_id',
+                message: 'What is the name of the employee you would like to update?',
+                choices: [
+                    'John Smith',
+                    'Jane Doe',
+                    'Bob Smith',
+                    'Sally Jones',
+                    'Joe Smith',
+                    'Billy Boi',
+                    'Jonathan Bejarano',
+                    'Mary Jane',
+                    'Jill Smith',
+                    'Jack Smith'
+                ]
+            },
+            {
+                type: 'choice',
+                name: 'role_id',
+                message: 'What is the new role id of the employee you would like to update?',
+                choices: [
+                    '1',
+                    '2',
+                    '3',
+                    '4',
+                    '5',
+                    '6',
+                    '7',
+                    '8',
+                    '9',
+                    '10'
+                ]
+            },
+        ])
+        .then((response) => {
+            let updateEmployee = (response.employee_id, response.role_id);
+        db.query('UPDATE employee SET ? WHERE ?', updateEmployee , function (err, results) {
+            console.table(results);
+        }
+        )})}
+    
+    });
 
-// _______             _                           ______                                      
-// (_______)           | |                         |  ___ \                                     
-//  _____   ____  ____ | | ___  _   _  ____ ____   | | _ | | ____ ____   ____  ____  ____  ____ 
-// |  ___) |    \|  _ \| |/ _ \| | | |/ _  ) _  )  | || || |/ _  |  _ \ / _  |/ _  |/ _  )/ ___)
-// | |_____| | | | | | | | |_| | |_| ( (/ ( (/ /   | || || ( ( | | | | ( ( | ( ( | ( (/ /| |    
-// |_______)_|_|_| ||_/|_|\___/ \__  |\____)____)  |_||_||_|\_||_|_| |_|\_||_|\_|| |\____)_|    
-//               |_|           (____/                                        (_____|            
+

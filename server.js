@@ -1,5 +1,5 @@
 const express = require('express');
-const { default: inquirer } = require('inquirer');
+const inquirer = require('inquirer');
 const mysql = require('mysql2');
 
 const PORT = process.env.PORT || 3001;
@@ -62,6 +62,7 @@ inquirer
         ]
     }
 ])
+ 
 .then((answers) => {
     if (answers.choice === 'View All Departments') {
         db.query('SELECT * FROM department', function (err, results) {
@@ -69,12 +70,20 @@ inquirer
         }
         )}
     else if (answers.choice === 'View All Roles') {
-        db.query('SELECT * FROM role', function (err, results) {
+        db.query("SELECT role.id, role.title, department.name AS department, role.salary FROM role LEFT JOIN department on role.department_id = department.id;"
+        , function (err, results) {
+           
             console.table(results);
         }
         )}
     else if (answers.choice === 'View All Employees') {
-        db.query('SELECT * FROM employee', function (err, results) {
+        db.query(`
+        SELECT e.id AS employee_id, e.first_name, e.last_name, r.title, d.name AS department, r.salary, CONCAT(m.first_name, ' ', m.last_name) AS manager_name
+FROM employee e
+LEFT JOIN role r ON e.role_id = r.id
+LEFT JOIN department d ON r.department_id = d.id
+LEFT JOIN employee m ON e.manager_id = m.id;`
+        , function (err, results) {
             console.table(results);
         }
         )}
@@ -88,9 +97,13 @@ inquirer
             }
         ])
         .then((response) => {
-            let newDepartment = response.department;
-        db.query('INSERT INTO department SET ?', newDepartment , function (err, results) {
+            let department = response.department;
+            console.log(department);
+        db.query('INSERT INTO department (name) VALUES (?);', department , function (err, results) {
+            console.log(`Added ${department} to table department.`);
+        db.query('SELECT * FROM department', function (err, results) {
             console.table(results);
+        });
         }
         )})}
     else if (answers.choice === 'Add a Role') {
@@ -102,7 +115,7 @@ inquirer
                 message: 'What is the title of the role you would like to add?'
             },
             {
-                type: 'choice',
+                type: 'list',
                 name: 'department_id',
                 message: 'What is the department id of the role you would like to add?',
                 choices: [
@@ -121,8 +134,9 @@ inquirer
            
         ])
         .then((response) => {
-            let newRole = (response.title, response.department_id, response.salary);
-        db.query('INSERT INTO role SET ?', newRole , function (err, results) {
+            let newRole = (`${response.title}, ${response.department_id}, ${response.salary}`);
+            console.log(`Added ${newRole} to table department.`);
+        db.query('INSERT INTO role (title, department_id, salary) VALUES (?)', newRole , function (err, results) {
             console.table(results);
         }
         )})}
@@ -140,7 +154,7 @@ inquirer
                 message: 'What is the last name of the employee you would like to add?'
             },
             {
-                type: 'choice',
+                type: 'list',
                 name: 'role_id',
                 message: 'What is the role id of the employee you would like to add?',
                 choices: [
@@ -152,7 +166,7 @@ inquirer
                 ]
             },
             {
-                type: 'choice',
+                type: 'list',
                 name: 'manager_id',
                 message: 'What is the manager id of the employee you would like to add? (Select NULL if none)',
                 choices: [

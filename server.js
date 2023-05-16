@@ -188,7 +188,6 @@ LEFT JOIN employee m ON e.manager_id = m.id;`
         ])
         .then((response) => {
             let newEmployee = [response.first_name, response.last_name, response.role_id, response.manager_id];
-            console.log(newEmployee)
         db.query('INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?,?,?,?);', newEmployee , function (err, results) {
             db.query(`
         SELECT e.id AS employee_id, e.first_name, e.last_name, r.title, d.name AS department, r.salary, CONCAT(m.first_name, ' ', m.last_name) AS manager_name
@@ -251,13 +250,9 @@ LEFT JOIN employee m ON e.manager_id = m.id;`
         ])
 
         .then((response) => {
-            // const {employee_id, role_id} = response;
-            // let updateEmployee = [response.employee_id, response.role_id];
-            console.log(response)
             const employee_id = response.employee_id;
             const role_id = response.role_id;
             const sql = `UPDATE employee SET role_id = ${role_id} WHERE employee.id = ${employee_id}`;
-        console.log(sql)
         db.query(sql, function (err, results) {
             console.log(`Updated employee ${employee_id} to role ${role_id}.`);
             db.query(`
@@ -275,6 +270,7 @@ LEFT JOIN employee m ON e.manager_id = m.id;`
         }
         )
     })}
+    
     
 });
    
